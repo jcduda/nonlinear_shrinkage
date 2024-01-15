@@ -285,27 +285,17 @@ getStatus()
 # If all jobs are done:
 ################################################################################
 
-# STOPPED HERE (all "added"-objects can be removed)
-
+# Summarize results into one object (might take a while)
 results_simulation_raw <- reduceResultsList()
-results_simulation_added_raw <- reduceResultsList(ids = added_jobs)
-save(results_simulation_raw, file = "040_results_simulation_raw.RData")
-save(results_simulation_added_raw, file = "041_results_simulation_added_raw.RData")
-# reduce = function(res) list(RMSE = res$RMSE)
-# results = unwrap(reduceResultsDataTable(fun = reduce))
-
+# Saved bject not shared in Git as it is too big. Can be provided upon request.
+save(results_simulation_raw, file = "030_results_simulation_raw.RData")
+# extract RMSE as performance measure
 RMSEs <- lapply(results_simulation_raw, function(x) x$RMSE) %>% unlist()
-RMSEs_added <- lapply(results_simulation_added_raw, function(x) x$RMSE) %>% unlist()
 
+# Prepare to add simulation settings to each performance result
 job_RMSE_done <- data.frame(job.id = findDone(), RMSE = RMSEs)
-job_RMSE_done_added <- data.frame(job.id = added_jobs, RMSE = RMSEs_added)
 pars = unwrap(getJobPars())
-pars_added = unwrap(getJobPars(ids = added_jobs))
 res_tab = ijoin(pars, job_RMSE_done)
-res_tab_added = ijoin(pars_added, job_RMSE_done_added)
-save(res_tab, file = "050_res_tab.RData")
-save(res_tab_added, file = "051_res_tab_added.RData")
-# In case you return to the session on a HPC cluster, you may need something like this
+save(res_tab, file = "040_results_simulation_table")
 
-loadRegistry(file.dir = "./030_simulation_run/registry/",
- writeable = TRUE, conf.file = "/work/smjududa/.batchtools.conf.R")
+
