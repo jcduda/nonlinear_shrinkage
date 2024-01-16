@@ -1,24 +1,22 @@
-# Testosterone example:
 
-# Parts that can be run locally +
-# load NLFS results from LiDo +
-# Visualize the whole thing
+################################################################################
+# Code for Figure 5: Testosterone example
+################################################################################
+
 
 library(dplyr)
-#library(ggplot2)
 library(DoseFinding)
 library(splines)
 library(invgamma)
-#library(ToxicR)
 
-source("../180_sim/010_functions/020_nlfs_head_fct.R")
-source("../180_sim/010_functions/030_bspline_head_fct.R")
-source("../180_sim/010_functions/010_gen_data_functions.R")
-source("../180_sim/010_functions/011_prep_B.R")
-source("../180_sim/010_functions/021_nlfs_updating_functions.R")
-source("../180_sim/010_functions/040_parametric_bspline_head_function.R")
-source("../180_sim/010_functions/041_parametric_bspline_updating_functions.R")
-source("../180_sim/010_functions/050_p_spline_head_fct.R")
+source("../02_simulation_study/010_functions/020_nlfs_head_fct.R")
+source("../02_simulation_study/010_functions/030_bspline_head_fct.R")
+source("../02_simulation_study/010_functions/010_gen_data_functions.R")
+source("../02_simulation_study/010_functions/011_prep_B.R")
+source("../02_simulation_study/010_functions/021_nlfs_updating_functions.R")
+source("../02_simulation_study/010_functions/040_parametric_bspline_head_function.R")
+source("../02_simulation_study/010_functions/041_parametric_bspline_updating_functions.R")
+source("../02_simulation_study/010_functions/050_p_spline_head_fct.R")
 
 d1 <- readxl::read_xlsx("testosterone_data.xlsx")
 d2 <- d1 %>% dplyr::select("log10(TT Observed + 1)", "Age Observed")
@@ -32,16 +30,12 @@ d <- d2 %>% # filter(age <= 60) %>%
 d <- as.list(d)
 d$n <- length(d$x)
 
-#-------------------------------------------------------------------------------
-# Load NLFS fit that was calculated on LiDO
-#-------------------------------------------------------------------------------
 
+# Load NLFS(Hill) fit result
 
-#load("./020_testosterone_nlfs_res.RData")
-#load("./040_testosterone_nlfs_res_below60.RData")
-load("./050_testosterone_nlfs_res_50knots.RData")
+load("./020_testosterone_nlfs_res_50knots.RData")
 
-# The model in the literature: --------------------------------------------------
+# The literature model: --------------------------------------------------------
 
 a <- 0.04655
 b <- -0.05311
@@ -56,19 +50,19 @@ their_fn <- function(x) 10^((a + c0*x + e* x^2 + g*x^3) /
 
 # P-Spline ---------------------------------------------------------------------
 
+# Takes a minute
 set.seed(1234)
 res_pspline <- pspline(d = d,
                             n_draw = 2000,
                             n_inner_knots = 50,
                        boundary_knots = c(min(d$x), max(d$x)))
 
-# Plotting ---------------------------------------------------------------------
 
-##########################################
-# Plot 1: NLFS, Literature model, P-spline
-##########################################
+################################################################################
+# Figure 5: NLFS, Literature model, P-spline
+################################################################################
 
-pdf("fig_010_testosterone.pdf", width = 5, height = 4)
+pdf("fig_050_testosterone.pdf", width = 5, height = 4)
 par(mgp = c(2, 1, 0), mar = c(3.5, 3, 2, 1))
 # mean Posterior
 plot(d$x, d$y, col = scales::alpha("black", 0.05), xlab = "Age [years]",
@@ -85,11 +79,3 @@ legend("topright", legend = c("NFLS(Hill)", "Literature model",  "P-spline"),
 
 dev.off()
 
-
-##########################################
-# Plot 1: NLFS, Literature model, P-spline
-##########################################
-
-
-
-lines(d$x,predict(ssp, x = d$x)$y, col = "blue")
