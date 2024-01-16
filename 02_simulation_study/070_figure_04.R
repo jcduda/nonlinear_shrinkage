@@ -1,7 +1,7 @@
 
-# STOPPED HERE ADAPT EVERYTHING
-
-# Example fits
+################################################################################
+# Code for Figure 3 (a - d): Different example fits
+################################################################################
 
 library(ggplot2)
 library(tidyverse)
@@ -11,7 +11,7 @@ library(DoseFinding)
 library(ToxicR)
 
 load("040_results_simulation_table.RData")
-#load("040_results_simulation_raw.RData")
+load("030_results_simulation_raw.RData")
 source("./010_functions/020_nlfs_head_fct.R")
 source("./010_functions/030_bspline_head_fct.R")
 source("./010_functions/010_gen_data_functions.R")
@@ -21,7 +21,11 @@ source("./010_functions/040_parametric_bspline_head_function.R")
 source("./010_functions/041_parametric_bspline_updating_functions.R")
 source("./010_functions/050_p_spline_head_fct.R")
 
-# Case: Truth = hill, n=50 ----------------------------------------------------
+################################################################################
+# Figure 4a (Truth = Hill)
+################################################################################
+
+# Truth = hill, n=50
 
 res_red <- res_tab %>% filter(n == 50, truth == "hill") %>%
   mutate(method_long = paste0(algorithm,"_",assume,"_",shrinkage)) %>%
@@ -31,18 +35,15 @@ res_red <- res_tab %>% filter(n == 50, truth == "hill") %>%
                             "nlfs_hill_own_slice")) %>%
   group_by(method_long) %>%
   filter(row_number() == 1)
-#                  algorithm %in% c("parametric_bspline", truth == "hill") %>%
-# group_by(assume) %>%
-# filter(row_number() == 1)
 
 ids <- as.character(res_red$job.id)
 
 names(results_simulation_raw) <- res_tab$job.id
 
 fits <- results_simulation_raw[ids]
-names(fits)
 
-# Redo nlfs(hill) fit to get smooth B-spline grid: #############################
+
+# NLFS(hill) fit ---------------------------------------------------------------
 d = fits[[1]][c("x", "y")]
 d$n <- length(d$x)
 d$true_fn <- get_true_fn(truth = "hill")
@@ -64,14 +65,13 @@ res_nlfs_hill <- nlfs(d = d,
                       theta5_mu = theta_prior[5],
                       theta5_sq = theta_prior[6])
 
-res_nlfs_hill$B
 x_vis <- seq(0, 1, 0.01)
 B_vis <- prep_B(x_vis, 15, min(d$x), max(d$x), c(0, 1))$B
 interc_mean <- mean(res_nlfs_hill$draws$all_interc[2001:12000])
 beta_mean <- rowMeans(res_nlfs_hill$draws$all_beta[, 2001:12000])
 nlfs_hill_yhat <- interc_mean + B_vis%*%beta_mean
 
-# Redo P-spline fit to get smooth B-spline grid: ###############################
+# P-spline fit -----------------------------------------------------------------
 
 set.seed(1234)
 res_pspline_hill <- pspline(d = d,
@@ -85,7 +85,8 @@ interc_mean <- mean(res_pspline_hill$draws$all_interc[2001:12000])
 beta_mean <- rowMeans(res_pspline_hill$draws$all_beta[, 2001:12000])
 pspline_hill_yhat <- interc_mean + B_vis%*%beta_mean
 
-# Fit parametric Hill-model (oracle scenario) #################################
+# Fit parametric Hill-model (oracle scenario) ----------------------------------
+
 d = fits[[1]][c("x", "y")]
 d$n <- length(d$x)
 d$true_fn <- get_true_fn(truth = "hill")
@@ -109,14 +110,9 @@ res_param_hill  <- single_continuous_fit(d$x, d$y, prior=cont_prior,
 
 param_hill_y_hat <- rowMeans(predict(res_param_hill, new_doses = x_vis)$Y)
 
-#-------------------------------------------------------------------------------
-#
-# First Plot: Truth: Hill
-#               methods: NLFS(Hill), Param.(Hill), P-Spline
-#-------------------------------------------------------------------------------
+# Put together 4a: NLFS(Hill), Param.(Hill), P-Spline --------------------------
 
-#pdf("100_fig_example_sim_red_n50_hill_truth.pdf", width = 6, height = 4)
-pdf("101_fig_ex_n50_publication.pdf", width = 4, height = 4)
+pdf("fig_04a_ex_n50.pdf", width = 4, height = 4)
 par(mgp = c(2, 1, 0), mar = c(3, 3, 3, 1))
 plot(fits[[1]]$x, fits[[1]]$y, pch = 16, col = scales::alpha("black", 0.2),
      xlab = "Dose", ylab = "Posterior mean", main = "Truth = Hill, n = 50")
@@ -132,11 +128,13 @@ legend("bottomright",
        lwd = c(2, 3, 2), lty = c(1, 2, 1))
 dev.off()
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
 
+################################################################################
+# Figure 4b (Truth = Hill)
+################################################################################
 
-# Redo nlfs(power) fit to get smooth B-spline grid: ############################
+# NLFS(power)
+
 d = fits[[1]][c("x", "y")]
 d$n <- length(d$x)
 d$true_fn <- get_true_fn(truth = "hill")
@@ -165,7 +163,7 @@ beta_mean <- rowMeans(res_nlfs_power$draws$all_beta[, 2001:12000])
 nlfs_power_yhat <- interc_mean + B_vis%*%beta_mean
 
 
-# Redo B-spline fit to get smooth B-spline grid: ###############################
+# B-spline ---------------------------------------------------------------------
 
 set.seed(1234)
 res_bspline_hill <- bspline(d = d,
@@ -179,7 +177,7 @@ interc_mean <- mean(res_bspline_hill$draws$all_interc[2001:12000])
 beta_mean <- rowMeans(res_bspline_hill$draws$all_beta[, 2001:12000])
 bspline_hill_yhat <- interc_mean + B_vis%*%beta_mean
 
-# Parametric(Power) fit ########################################################
+# Parametric(Power) ------------------------------------------------------------
 
 d = fits[[1]][c("x", "y")]
 d$n <- length(d$x)
@@ -203,14 +201,9 @@ res_param_power  <- single_continuous_fit(d$x, d$y, prior=cont_prior,
 param_power_yhat <- rowMeans(predict(res_param_power, new_doses = x_vis)$Y)
 
 
-#-------------------------------------------------------------------------------
-#
-# Second Plot: Truth: Hill
-#               methods: NLFS(Power), B-Spline, Param.(Power), P-Spline
-#-------------------------------------------------------------------------------
+# Put together 4b: NLFS(Power), B-Spline, Param.(Power), P-Spline --------------
 
-#pdf("100_fig_example_sim_red_n50_hill_truth.pdf", width = 6, height = 4)
-pdf("101_fig_ex_n50_publication_b.pdf", width = 4, height = 4)
+pdf("fig_04b_ex_n50.pdf", width = 4, height = 4)
 par(mgp = c(2, 1, 0), mar = c(3, 3, 3, 1))
 plot(fits[[1]]$x, fits[[1]]$y, pch = 16, col = scales::alpha("black", 0.2),
      xlab = "Dose", ylab = "Posterior mean", main = "Truth = Hill, n = 50")
@@ -226,15 +219,10 @@ legend("bottomright",
        lwd = c(2, 3, 2), lty = c(1, 2, 1))
 dev.off()
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
 
-
-
-
-#-------------------------------------------------------------------------------
-# Case: Truth = hilldown, n=50 -------------------------------------------------
-#-------------------------------------------------------------------------------
+################################################################################
+# Figure 4c (Truth = Hill+Downturn)
+################################################################################
 
 res_red <- res_tab %>% filter(n == 50, truth == "hilldown") %>%
   mutate(method_long = paste0(algorithm,"_",assume,"_",shrinkage)) %>%
@@ -255,7 +243,7 @@ names(results_simulation_raw) <- res_tab$job.id
 fits <- results_simulation_raw[ids]
 
 
-# Redo nlfs(Hill+power) fit to get smooth B-spline grid: #######################
+# NLFS(Hill+power) -------------------------------------------------------------
 d = fits[[1]][c("x", "y")]
 d$n <- length(d$x)
 d$true_fn <- get_true_fn(truth = "hilldown")
@@ -284,7 +272,7 @@ interc_mean <- mean(res_nlfs_hillpower$draws$all_interc[2001:12000])
 beta_mean <- rowMeans(res_nlfs_hillpower$draws$all_beta[, 2001:12000])
 nlfs_hillpower_yhat <- interc_mean + B_vis%*%beta_mean
 
-# Redo P-spline fit to get smooth B-spline grid: ###############################
+# P-Spline ---------------------------------------------------------------------
 
 set.seed(1234)
 res_pspline_hilldown <- pspline(d = d,
@@ -292,32 +280,28 @@ res_pspline_hilldown <- pspline(d = d,
                                 n_inner_knots = 15)
 
 
-x_vis <- seq(0, 1, 0.01)
+x_vis <- seq(min(d$x), 1, 0.01)
 B_vis <- prep_B(x_vis, 15, min(d$x), max(d$x), c(0, 1))$B
 interc_mean <- mean(res_pspline_hilldown$draws$all_interc[2001:12000])
 beta_mean <- rowMeans(res_pspline_hilldown$draws$all_beta[, 2001:12000])
 pspline_hilldown_yhat <- interc_mean + B_vis%*%beta_mean
 
 
-# True mean response ###########################################################
+# True mean response -----------------------------------------------------------
 
 truth_hillpower <- d$true_fn(x_vis)
 
-#-------------------------------------------------------------------------------
-#
-# Third Plot: Truth: Hill + Downturn
-#               methods: NLFS(Hill+Power), P-Spline, Truth
-#-------------------------------------------------------------------------------
+# Put together 4c: NLFS(Hill+power), P-Spline, Truth ---------------------------
 
-#pdf("100_fig_example_sim_red_n50_hill_truth.pdf", width = 6, height = 4)
-pdf("101_fig_ex_n50_publication_c.pdf", width = 4, height = 4)
+
+pdf("fig_04c_ex_n50.pdf", width = 4, height = 4)
 par(mgp = c(2, 1, 0), mar = c(3, 3, 3, 1))
 plot(fits[[1]]$x, fits[[1]]$y, pch = 16, col = scales::alpha("black", 0.2),
      xlab = "Dose", ylab = "Posterior mean", main = "Truth = Hill + Downturn, n = 50")
 # P-Spline
-lines(x_vis, pspline_hilldown_yhat, col = "magenta", lwd = 2, lty = 1)
+lines(x_vis, pspline_hilldown_yhat[,1], col = "magenta", lwd = 2, lty = 1)
 #nlfs(hill+power)
-lines(x_vis, nlfs_hillpower_yhat, col = "forestgreen", lwd = 3)
+lines(x_vis, nlfs_hillpower_yhat[,1], col = "forestgreen", lwd = 3)
 # Truth:
 lines(x_vis, truth_hillpower, col = "black", lwd = 2, lty = 2)
 legend("bottomright",
@@ -326,19 +310,10 @@ legend("bottomright",
        lwd = c(3, 2, 2), lty = c(1, 1, 2))
 dev.off()
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-
-
 
 ################################################################################
-
-# Forth plot: Compare CIs between param(Hill)+B-spline and nlfs(hill)
-
+# Figure 4d: Credible intervals of param(Hill)+B-Spline and NLFS(Hill)
 ################################################################################
-
-
-# Case: Truth = hill, n=50 ----------------------------------------------------
 
 res_red <- res_tab %>% filter(n == 50, truth == "hill") %>%
   mutate(method_long = paste0(algorithm,"_",assume,"_",shrinkage)) %>%
@@ -348,9 +323,6 @@ res_red <- res_tab %>% filter(n == 50, truth == "hill") %>%
                             "nlfs_hill_own_slice")) %>%
   group_by(method_long) %>%
   filter(row_number() == 1)
-#                  algorithm %in% c("parametric_bspline", truth == "hill") %>%
-# group_by(assume) %>%
-# filter(row_number() == 1)
 
 ids <- as.character(res_red$job.id)
 
@@ -359,7 +331,7 @@ names(results_simulation_raw) <- res_tab$job.id
 fits <- results_simulation_raw[ids]
 names(fits)
 
-# Redo nlfs fit to get smooth B-spline grid: ###################################
+# NLFS(Hill)
 d = fits[[1]][c("x", "y")]
 d$n <- length(d$x)
 d$true_fn <- get_true_fn(truth = "hill")
@@ -388,7 +360,7 @@ interc_mean <- mean(res_nlfs_hill$draws$all_interc[2001:12000])
 beta_mean <- rowMeans(res_nlfs_hill$draws$all_beta[, 2001:12000])
 nlfs_hill_yhat <- interc_mean + B_vis%*%beta_mean
 
-# Get upper and lower limits, but on fine grid:
+# Upper and lower limits of CIs
 
 y_hat_vis <- matrix(res_nlfs_hill$draws$all_interc[2001:12000], byrow = TRUE,
                     nrow = length(x_vis), ncol = length(res_nlfs_hill$draws$all_interc[2001:12000])) +
@@ -397,9 +369,7 @@ y_hat_vis <- matrix(res_nlfs_hill$draws$all_interc[2001:12000], byrow = TRUE,
 nlfs_upper_vis <- apply(y_hat_vis, 1, function(x) quantile(x, 0.95))
 nlfs_lower_vis <- apply(y_hat_vis, 1, function(x) quantile(x, 0.05))
 
-################################################################################
-
-# Param. (Hill) + bspline
+# Param. (Hill) + B-spline -----------------------------------------------------
 
 d = fits[[1]][c("x", "y")]
 d$n <- length(d$x)
@@ -416,7 +386,7 @@ res_param_bspline <- parametric_bspline(d = d, n_draw = 12000,
                                         theta4_mean = theta_prior[3],
                                         theta4_var = theta_prior[4])
 
-# Get the parametric part
+# Retrieve parametric part of Param.(Hill) + B-spline
 samples <- 2001:12000
 all_param <- sapply(samples, function(i){
   sigEmax(x_vis, e0 = res_param_bspline$draws$all_interc[i],
@@ -434,10 +404,10 @@ param_bspline_lower_vis <- apply(y_hat_vis, 1, function(x) quantile(x, 0.05))
 
 param_bspline_yhat <- rowMeans(y_hat_vis)
 
-# Plot together
+# Put together 4d: CIs NLFS(Hill), Param.(Hill) + B-Spline ---------------------
 
 
-pdf("101_fig_ex_n50_publication_d.pdf", width = 4, height = 4)
+pdf("fig_04d_ex_n50.pdf", width = 4, height = 4)
 par(mgp = c(2, 1, 0), mar = c(3, 3, 3, 1))
 plot(d$x, d$y, pch = 16, col = scales::alpha("black", 0.3), xlab = "Dose",
      ylab = "Response", main = "Truth = Hill, n = 50")
