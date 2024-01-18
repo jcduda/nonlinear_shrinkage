@@ -1,29 +1,6 @@
 
 
-# Code for Figure 1 and 2 in the manuscript
-
-# Figure 1 #####################################################################
-
-library(invgamma)
-
-# We mathematically derived what is (prop. to) the density of omega:
-
-pdf("fig_01_omega_prior_labels_with_Omega0.pdf", width = 6, height = 4)
-par(mar = c(2.5, 3, 2, 0.6), mgp = c(1.5, 0.5, 0), cex = 1.2)
-a = b = 0.5
-f_omega <- function(x) 1/2 * x^(a-1) * (1-x)^(b-1)
-curve(f_omega, from = 0.01, to = 0.99,
-      ylab = "Density up to constants", xaxt = "n",
-      xlab = expression(omega==1/(1+tau^2)))
-axis(side=1, at=c(0, 1))
-text(0.8, 4.5, expression(Shrinkage))
-text(0.8, 4, expression((f~'in'~{Omega[0]^{Theta}})))
-
-text(0.2, 4.5, expression(No~shrinkage))
-text(0.2, 4, expression((f~outside~Omega[0]^{Theta})))
-dev.off()
-
-# Figure 2 #####################################################################
+# Code for Figure 1  ###########################################################
 
 
 source("../02_simulation_study/010_functions/010_gen_data_functions.R")
@@ -37,7 +14,7 @@ hill1 <- function(x) sigEmax(x, e0 = 0.2, eMax = 1,
 
 
 
-pdf("fig_02_hill_schematic_curve.pdf", width = 4, height = 3)
+pdf("fig_01_hill_schematic_curve.pdf", width = 4, height = 3)
 par(mar = c(3, 3, 0.3, 0.1), mgp = c(2, 1, 0))
 curve(hill1,  xlab = "Dose", ylab = "Response", ylim = c(0, 1.2),
       yaxt = "n")

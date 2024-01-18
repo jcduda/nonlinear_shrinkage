@@ -22,7 +22,7 @@ source("./010_functions/041_parametric_bspline_updating_functions.R")
 source("./010_functions/050_p_spline_head_fct.R")
 
 ################################################################################
-# Figure 4a (Truth = Hill)
+# Figure 3a (Truth = Hill)
 ################################################################################
 
 # Truth = hill, n=50
@@ -110,9 +110,9 @@ res_param_hill  <- single_continuous_fit(d$x, d$y, prior=cont_prior,
 
 param_hill_y_hat <- rowMeans(predict(res_param_hill, new_doses = x_vis)$Y)
 
-# Put together 4a: NLFS(Hill), Param.(Hill), P-Spline --------------------------
+# Put together 3a: NLFS(Hill), Param.(Hill), P-Spline --------------------------
 
-pdf("fig_04a_ex_n50.pdf", width = 4, height = 4)
+pdf("fig_03a_ex_n50.pdf", width = 4, height = 4)
 par(mgp = c(2, 1, 0), mar = c(3, 3, 3, 1))
 plot(fits[[1]]$x, fits[[1]]$y, pch = 16, col = scales::alpha("black", 0.2),
      xlab = "Dose", ylab = "Posterior mean", main = "Truth = Hill, n = 50")
@@ -130,7 +130,7 @@ dev.off()
 
 
 ################################################################################
-# Figure 4b (Truth = Hill)
+# Figure 3b (Truth = Hill)
 ################################################################################
 
 # NLFS(power)
@@ -201,9 +201,9 @@ res_param_power  <- single_continuous_fit(d$x, d$y, prior=cont_prior,
 param_power_yhat <- rowMeans(predict(res_param_power, new_doses = x_vis)$Y)
 
 
-# Put together 4b: NLFS(Power), B-Spline, Param.(Power), P-Spline --------------
+# Put together 3b: NLFS(Power), B-Spline, Param.(Power), P-Spline --------------
 
-pdf("fig_04b_ex_n50.pdf", width = 4, height = 4)
+pdf("fig_03b_ex_n50.pdf", width = 4, height = 4)
 par(mgp = c(2, 1, 0), mar = c(3, 3, 3, 1))
 plot(fits[[1]]$x, fits[[1]]$y, pch = 16, col = scales::alpha("black", 0.2),
      xlab = "Dose", ylab = "Posterior mean", main = "Truth = Hill, n = 50")
@@ -221,7 +221,7 @@ dev.off()
 
 
 ################################################################################
-# Figure 4c (Truth = Hill+Downturn)
+# Figure 3c (Truth = Hill+Downturn)
 ################################################################################
 
 res_red <- res_tab %>% filter(n == 50, truth == "hilldown") %>%
@@ -291,10 +291,9 @@ pspline_hilldown_yhat <- interc_mean + B_vis%*%beta_mean
 
 truth_hillpower <- d$true_fn(x_vis)
 
-# Put together 4c: NLFS(Hill+power), P-Spline, Truth ---------------------------
+# Put together 3c: NLFS(Hill+power), P-Spline, Truth ---------------------------
 
-
-pdf("fig_04c_ex_n50.pdf", width = 4, height = 4)
+pdf("fig_03c_ex_n50.pdf", width = 4, height = 4)
 par(mgp = c(2, 1, 0), mar = c(3, 3, 3, 1))
 plot(fits[[1]]$x, fits[[1]]$y, pch = 16, col = scales::alpha("black", 0.2),
      xlab = "Dose", ylab = "Posterior mean", main = "Truth = Hill + Downturn, n = 50")
@@ -312,7 +311,7 @@ dev.off()
 
 
 ################################################################################
-# Figure 4d: Credible intervals of param(Hill)+B-Spline and NLFS(Hill)
+# Figure 3d: Credible intervals of param(Hill)+B-Spline and NLFS(Hill)
 ################################################################################
 
 res_red <- res_tab %>% filter(n == 50, truth == "hill") %>%
@@ -404,10 +403,10 @@ param_bspline_lower_vis <- apply(y_hat_vis, 1, function(x) quantile(x, 0.05))
 
 param_bspline_yhat <- rowMeans(y_hat_vis)
 
-# Put together 4d: CIs NLFS(Hill), Param.(Hill) + B-Spline ---------------------
+# Put together 3d: CIs NLFS(Hill), Param.(Hill) + B-Spline ---------------------
 
 
-pdf("fig_04d_ex_n50.pdf", width = 4, height = 4)
+pdf("fig_03d_ex_n50.pdf", width = 4, height = 4)
 par(mgp = c(2, 1, 0), mar = c(3, 3, 3, 1))
 plot(d$x, d$y, pch = 16, col = scales::alpha("black", 0.3), xlab = "Dose",
      ylab = "Response", main = "Truth = Hill, n = 50")

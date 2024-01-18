@@ -1,6 +1,6 @@
 
 ################################################################################
-# Code for Figure 3 (a & b): Boxplots of summarized, reduced simulation results
+# Code for Figure 2 (a & b): Boxplots of summarized, reduced simulation results
 ################################################################################
 
 library(ggplot2)
@@ -9,7 +9,7 @@ library(patchwork)
 load("040_results_simulation_table.RData")
 
 #############
-# Figure 3a
+# Figure 2a
 #############
 
 # Only the case where the truth is the Hill model
@@ -61,7 +61,7 @@ p1
 
 
 #############
-# Figure 3b
+# Figure 2b
 #############
 
 # Only the case where the truth is a Hill model with a downturn effect
@@ -105,8 +105,8 @@ p2 <- res_reduced %>%
         axis.title = element_text(size = rel(1.2)))
 
 
-# Put 3a (p1) and 3b (p2) next to each other, share legend
+# Put 2a (p1) and 2b (p2) next to each other, share legend
 
 p1 + p2 + plot_layout(guides = "collect", widths = c(1, 1.2))
 
-ggsave("fig_03_sim_res_reduced.pdf", width = 10, height = 5)
+ggsave("fig_02_sim_res_reduced.pdf", width = 10, height = 5)
